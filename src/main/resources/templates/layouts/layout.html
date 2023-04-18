@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="ja" xmlns="http://www.w3.org/1999/xhtml"
 	xmlns:th="http://www.thymeleaf.org"
+	xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
 	xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 <head>
 <meta charset="UTF-8">
@@ -12,9 +13,16 @@
 	crossorigin="anonymous">
 <link rel="stylesheet"
 	href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css">
-<title>Pictgram</title>
+<link rel="stylesheet" href="/css/style.css" th:href="@{/css/style.css}">
+<title>Pictgram!!!!!!!!</title>
 </head>
 <body>
+	<div th:if="${hasMessage}" class="alert alert-dismissible fade show"
+		th:classappend="${class}" role='alert'>
+		<button type="button" class="btn-close" data-bs-dismiss="alert"
+			aria-label="Close"></button>
+		<span th:text="${message}"></span>
+	</div>
 	<nav layout:replace="~{layouts/common :: nav}"></nav>
 	<div layout:fragment="contents"></div>
 	<script
@@ -23,5 +31,13 @@
 		crossorigin="anonymous"></script>
 	<script
 		src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+	<script src="/scripts/method-convert.js" th:src="@{/scripts/method-convert.js}"></script>
+	<!-- jQuery flashメッセージを表示する --> 
+	<script>
+		$(function() {
+			convertMethod('.convert');
+			$(".alert").fadeOut(5000);
+		});
+	</script>
 </body>
 </html>
