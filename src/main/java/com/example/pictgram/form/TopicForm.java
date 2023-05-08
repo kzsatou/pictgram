@@ -12,6 +12,7 @@ import com.example.pictgram.validation.constraints.ImageNotEmpty;
 
 import lombok.Data;
 
+/*コントローラ、ビュー間でやり取りをする時受け渡すオブジェクトのクラス*/
 
 /*投稿のフォーム*/
 @Data
@@ -38,4 +39,6 @@ public class TopicForm {
     private List<FavoriteForm> favorites;
     
     private FavoriteForm favorite;
+    
+    private List<CommentForm> comments;
 }

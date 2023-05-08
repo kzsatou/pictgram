@@ -34,9 +34,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.example.pictgram.entity.Comment;
 import com.example.pictgram.entity.Favorite;
 import com.example.pictgram.entity.Topic;
 import com.example.pictgram.entity.UserInf;
+import com.example.pictgram.form.CommentForm;
 import com.example.pictgram.form.FavoriteForm;
 import com.example.pictgram.form.TopicForm;
 import com.example.pictgram.form.UserForm;
@@ -83,16 +85,20 @@ public class TopicsController {
 	public TopicForm getTopic(UserInf user, Topic entity) throws FileNotFoundException, IOException {
 		/* マッピング */
 		modelMapper.getConfiguration().setAmbiguityIgnored(true);
-		/*アロー演算子?*/
+		/* アロー演算子? */
 		modelMapper.typeMap(Topic.class, TopicForm.class).addMappings(mapper -> mapper.skip(TopicForm::setUser));
 		/* お気に入りとの関連 */
 		modelMapper.typeMap(Topic.class, TopicForm.class).addMappings(mapper -> mapper.skip(TopicForm::setFavorites));
+		/* コメント */
+		modelMapper.typeMap(Topic.class, TopicForm.class).addMappings(mapper -> mapper.skip(TopicForm::setComments));
 		modelMapper.typeMap(Favorite.class, FavoriteForm.class)
 				.addMappings(mapper -> mapper.skip(FavoriteForm::setTopic));
 
+		log.info("topic保存処理来た");
 		boolean isImageLocal = false;
 		if (imageLocal != null) {
-			isImageLocal = new Boolean(imageLocal);
+			// isImageLocal = new Boolean(imageLocal);
+			isImageLocal = true;
 		}
 		/* formとentityを変換 */
 		TopicForm form = modelMapper.map(entity, TopicForm.class);
@@ -119,7 +125,7 @@ public class TopicsController {
 		form.setUser(userForm);
 
 		List<FavoriteForm> favorites = new ArrayList<FavoriteForm>();
-		/*拡張for文*/
+		/* 拡張for文 */
 		for (Favorite favoriteEntity : entity.getFavorites()) {
 			FavoriteForm favorite = modelMapper.map(favoriteEntity, FavoriteForm.class);
 			favorites.add(favorite);
@@ -128,6 +134,16 @@ public class TopicsController {
 			}
 		}
 		form.setFavorites(favorites);
+
+		/*コメント*/
+		List<CommentForm> comments = new ArrayList<CommentForm>();
+
+		for (Comment commentEntity : entity.getComments()) {
+			CommentForm comment = modelMapper.map(commentEntity, CommentForm.class);
+			comments.add(comment);
+		}
+		
+		form.setComments(comments);
 
 		return form;
 	}
@@ -163,9 +179,11 @@ public class TopicsController {
 	 * form, BindingResult result, Model model, @RequestParam MultipartFile image,
 	 * RedirectAttributes redirAttrs) throws IOException {
 	 */
+	@RequestMapping(value = "/topic", method = RequestMethod.POST)
 	public String create(Principal principal, @Validated @ModelAttribute("form") TopicForm form, BindingResult result,
 			Model model, @RequestParam MultipartFile image, RedirectAttributes redirAttrs, Locale locale)
 			throws IOException {
+		log.info("creat処理来た");
 		if (result.hasErrors()) {
 			model.addAttribute("hasMessage", true);
 			model.addAttribute("class", "alert-danger");
@@ -178,7 +196,8 @@ public class TopicsController {
 
 		boolean isImageLocal = false;
 		if (imageLocal != null) {
-			isImageLocal = new Boolean(imageLocal);
+			// isImageLocal = new Boolean(imageLocal);
+			isImageLocal = true;
 		}
 
 		Topic entity = new Topic();
@@ -208,6 +227,7 @@ public class TopicsController {
 	/* MultipartFileで投稿された画像を受け取る */
 	private File saveImageLocal(MultipartFile image, Topic entity) throws IOException {
 		/* /uploadsに画像を保存 */
+		log.info("投稿画像処理来た");
 		File uploadDir = new File("/uploads");
 		uploadDir.mkdir();
 
@@ -215,6 +235,7 @@ public class TopicsController {
 		String realPathToUploads = request.getServletContext().getRealPath(uploadsDir);
 		if (!new File(realPathToUploads).exists()) {
 			new File(realPathToUploads).mkdir();
+			log.info("投稿画像パス作成処理来た");
 		}
 		String fileName = image.getOriginalFilename();
 		File destFile = new File(realPathToUploads, fileName);

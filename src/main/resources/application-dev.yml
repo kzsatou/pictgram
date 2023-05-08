@@ -12,3 +12,9 @@ debug: true
 
 image:
   local: true
+ 
+logging:
+    level:
+      root: info 
+    file:
+      name: test
