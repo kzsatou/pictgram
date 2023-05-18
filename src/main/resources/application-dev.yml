@@ -22,3 +22,6 @@ logging:
       root: info 
     file:
       name: test
+      
+onesignal:
+  id: ${onesignal.id}
