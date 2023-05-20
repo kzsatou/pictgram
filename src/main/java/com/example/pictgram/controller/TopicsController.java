@@ -33,6 +33,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import org.thymeleaf.context.Context;
 
 import com.example.pictgram.entity.Comment;
 import com.example.pictgram.entity.Favorite;
@@ -43,6 +44,7 @@ import com.example.pictgram.form.FavoriteForm;
 import com.example.pictgram.form.TopicForm;
 import com.example.pictgram.form.UserForm;
 import com.example.pictgram.repository.TopicRepository;
+import com.example.pictgram.service.SendMailService;
 
 @Controller
 public class TopicsController {
@@ -64,6 +66,11 @@ public class TopicsController {
 	/* 画像の保存先を指定 */
 	@Value("${image.local:false}")
 	private String imageLocal;
+
+	/* メール送信 */
+
+	@Autowired
+	private SendMailService sendMailService;
 
 	/* ログイン後、投稿画面に遷移 */
 	@GetMapping(path = "/topics")
@@ -135,14 +142,14 @@ public class TopicsController {
 		}
 		form.setFavorites(favorites);
 
-		/*コメント*/
+		/* コメント */
 		List<CommentForm> comments = new ArrayList<CommentForm>();
 
 		for (Comment commentEntity : entity.getComments()) {
 			CommentForm comment = modelMapper.map(commentEntity, CommentForm.class);
 			comments.add(comment);
 		}
-		
+
 		form.setComments(comments);
 
 		return form;
@@ -221,6 +228,15 @@ public class TopicsController {
 				messageSource.getMessage("topics.create.flash.2", new String[] {}, locale));
 		/* modelの中身を確認したい */
 		log.info("model={}", model); // パスワードの中身が見える
+
+		/* 投稿したらメール送信 */
+
+		Context context = new Context();
+		context.setVariable("title", "【Pictgram】新規投稿");
+		context.setVariable("name", user.getUsername());
+		context.setVariable("description", entity.getDescription());
+		sendMailService.sendMail(context);
+
 		return "redirect:/topics";
 	}
 
