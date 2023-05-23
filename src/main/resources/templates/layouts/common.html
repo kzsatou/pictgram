@@ -34,6 +34,11 @@
 								src="/images/icons/logout.png"
 								th:src="@{/images/icons/logout.png}">
 						</a></li>
+						<!-- csv追加 -->
+						<li class="nav-item"><a th:href="@{/topics/topic.csv}"
+							class="nav-link convert" data-method="get"
+							th:data-_csrf="${_csrf.token}"> csvダウンロード
+						</a></li>
 					</th:block>
 					<!-- ログインしていない状態で表示されるリンク -->
 					<th:block sec:authorize="!isAuthenticated()">
